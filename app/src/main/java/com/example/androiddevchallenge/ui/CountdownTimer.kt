@@ -20,16 +20,16 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material.Button
 import androidx.compose.material.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -88,7 +88,7 @@ fun CountdownTimerLayout() {
             BasicTextField(
                 value = "$currentNumStr",
                 onValueChange = {
-                    if ((it.isDigitsOnly() || it.isEmpty())&& it.length <= 4) {
+                    if ((it.isDigitsOnly() || it.isEmpty()) && it.length <= 4) {
                         currentNumStr = it
                         currentNum = it.toIntOrNull() ?: 1
                     }
@@ -112,7 +112,9 @@ fun CountdownTimerLayout() {
                     textEditEnabled = false
                 },
                 enabled = startBtnEnabled,
-                modifier = Modifier.align(Alignment.BottomCenter).padding(30.dp)
+                modifier = Modifier
+                    .align(Alignment.BottomCenter)
+                    .padding(30.dp)
             ) {
                 Text("Countdown Start!")
             }
