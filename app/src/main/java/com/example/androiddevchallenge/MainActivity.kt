@@ -38,19 +38,14 @@ class MainActivity : AppCompatActivity() {
                                 Text("Countdown Timer")
                             }
                         )
+                    },
+                    bottomBar = {
+                        CountdownTimerLayout()
                     }
                 ) {
-                    CountdownTimerLayout()
                 }
             }
         }
     }
 }
 
-@Preview
-@Composable
-fun CountdownTimerPreview() {
-    MyTheme {
-        CountdownTimerLayout()
-    }
-}
