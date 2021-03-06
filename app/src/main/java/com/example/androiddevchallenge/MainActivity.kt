@@ -21,8 +21,6 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
 import androidx.compose.material.TopAppBar
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.tooling.preview.Preview
 import com.example.androiddevchallenge.ui.CountdownTimerLayout
 import com.example.androiddevchallenge.ui.theme.MyTheme
 
@@ -30,7 +28,7 @@ class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MyTheme {
+            MyTheme(true) {
                 Scaffold(
                     topBar = {
                         TopAppBar(
@@ -38,14 +36,11 @@ class MainActivity : AppCompatActivity() {
                                 Text("Countdown Timer")
                             }
                         )
-                    },
-                    bottomBar = {
-                        CountdownTimerLayout()
                     }
                 ) {
+                    CountdownTimerLayout()
                 }
             }
         }
     }
 }
-

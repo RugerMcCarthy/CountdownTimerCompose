@@ -15,16 +15,17 @@
  */
 package com.example.androiddevchallenge.ui
 
-import android.util.Log
 import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.animate
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.Image
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.offset
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
-import androidx.compose.foundation.text.KeyboardActions
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.Button
 import androidx.compose.material.Scaffold
 import androidx.compose.material.Text
@@ -37,32 +38,27 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.isFocused
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.SemanticsPropertyKey
-import androidx.compose.ui.semantics.SemanticsPropertyReceiver
-import androidx.compose.ui.semantics.semantics
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.input.ImeAction
-import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.text.isDigitsOnly
+import com.example.androiddevchallenge.R
 import com.example.androiddevchallenge.ui.theme.MyTheme
-import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.joinAll
 import kotlinx.coroutines.launch
-
-val KeyboardShownKey = SemanticsPropertyKey<Boolean>("KeyboardShownKey")
-var SemanticsPropertyReceiver.keyboardShownProperty by KeyboardShownKey
 
 @Composable
 fun CountdownTimerLayout() {
@@ -75,7 +71,8 @@ fun CountdownTimerLayout() {
     var startBtnEnabled by remember { mutableStateOf(true) }
     var textScale = remember { Animatable(1f) }
     var isFocus by remember { mutableStateOf(false) }
-    val fontSize = 50.sp
+    var sweepAngle = remember { Animatable(0f) }
+    var fontSize by remember { mutableStateOf(50.sp) }
     LaunchedEffect(isFocus) {
         if (isFocus) {
             textOffset.animateTo(-100.dp.value, animationSpec = tween(500))
@@ -85,6 +82,9 @@ fun CountdownTimerLayout() {
     }
     LaunchedEffect(isStart) {
         if (isStart) {
+            launch {
+                sweepAngle.animateTo(360f, animationSpec = tween(currentNum * 1000))
+            }
             while (currentNum >= 1) {
                 var fadeOutTextScale = launch {
                     textScale.animateTo(2f, animationSpec = tween(500))
@@ -106,6 +106,7 @@ fun CountdownTimerLayout() {
                 currentNumStr = currentNum.toString()
                 when (currentNum) {
                     1 -> {
+                        fontSize = 30.sp
                         currentNumStr = "Compose🎉️"
                     }
                 }
@@ -117,13 +118,25 @@ fun CountdownTimerLayout() {
             isStart = false
         }
     }
-    Box(Modifier.fillMaxSize().offset(y = textOffset.value.dp), contentAlignment = Alignment.Center) {
-        Box(modifier = Modifier.size(300.dp), contentAlignment = Alignment.Center) {
+    Box(
+        Modifier
+            .fillMaxSize()
+            .offset(y = textOffset.value.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Box(modifier = Modifier.size(350.dp), contentAlignment = Alignment.Center) {
             Canvas(modifier = Modifier.fillMaxSize()) {
-                drawRoundRect(
-                    Color(0x1E7171),
-                    cornerRadius = CornerRadius(100f, 100f),
-                    style = Stroke(width = 20.dp.value)
+                drawCircle(
+                    color = Color(0xFF1E7171),
+                    center = Offset(drawContext.size.width / 2f, drawContext.size.height / 2f),
+                    style = Stroke(width = 50.dp.value)
+                )
+                drawArc(
+                    color = Color(0xFF3BDCCE),
+                    startAngle = -90f,
+                    sweepAngle = sweepAngle.value,
+                    useCenter = false,
+                    style = Stroke(width = 50.dp.value, cap = StrokeCap.Round)
                 )
             }
             BasicTextField(
@@ -138,6 +151,7 @@ fun CountdownTimerLayout() {
                     fontSize = fontSize,
                     fontWeight = FontWeight.Bold,
                     textAlign = TextAlign.Center,
+                    color = Color.White
                 ),
                 modifier = Modifier
                     .graphicsLayer(
@@ -148,7 +162,11 @@ fun CountdownTimerLayout() {
                     .onFocusChanged {
                         isFocus = it.isFocused
                         if (it.isFocused) {
+                            GlobalScope.launch {
+                                sweepAngle.animateTo(0f, tween(1000))
+                            }
                             if (currentNumStr == "Compose\uD83C\uDF89️") {
+                                fontSize = 50.sp
                                 currentNumStr = "1"
                             }
                         } else {
@@ -168,9 +186,22 @@ fun CountdownTimerLayout() {
                 enabled = startBtnEnabled,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
-                    .padding(30.dp)
+                    .padding(70.dp)
+                    .size(50.dp)
+                    .clip(RoundedCornerShape(25.dp))
             ) {
-                Text("Countdown Start!")
+                if (!isStart) {
+                    Image(
+                        painter = painterResource(id = R.drawable.countdown_start),
+                        contentDescription = "Start",
+                        modifier = Modifier.padding(start = 3.dp)
+                    )
+                } else {
+                    Image(
+                        painter = painterResource(id = R.drawable.countdown_stop),
+                        contentDescription = "Top"
+                    )
+                }
             }
         }
     }
